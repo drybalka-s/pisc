@@ -5,7 +5,7 @@
 set -Eeo pipefail
 
 version() {
-    echo v0.20.0
+    echo v0.19.0-rc2
 }
 
 usage() {
@@ -134,7 +134,7 @@ debug_set() {
 
 # read the options
 debug_set false
-ARGS=$(getopt -o dehf:i:lmv --long auth-file:,date,d-days:,epss-and,epss-min:,exclusions-file,exploits,file:,help,ignore-errors,image:,latest,misconfig,offline-feeds,output-dir:,scanner:,severity-min:,show-exploits,tar:,trivy-server:,trivy-token:,version,virustotal-key:,vulners-key: -n $0 -- "$@")
+ARGS=$(getopt -o dehf:i:lmv --long auth-file:,date,d-days:,epss-and,epss-min:,exclusions-file:,exploits,file:,help,ignore-errors,image:,latest,misconfig,offline-feeds,output-dir:,scanner:,severity-min:,show-exploits,tar:,trivy-server:,trivy-token:,version,virustotal-key:,vulners-key: -n $0 -- "$@")
 eval set -- "$ARGS"
 debug_set true
 
