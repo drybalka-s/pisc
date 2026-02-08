@@ -2,7 +2,7 @@ name: Build and Push feeds Docker image
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 4 * * *'
   workflow_dispatch:
 
 jobs:

@@ -27,7 +27,7 @@ IMAGE_LINK=''
 # it is important for run *.sh by ci-runner
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # get exported var with default value if it is empty
-: "${OUT_DIR:=/tmp}"
+: "${PISC_OUT_DIR:=/tmp}"
 # check debug mode to debug child scripts
 DEBUG=''
 if [[ "$-" == *x* ]]; then
@@ -37,9 +37,9 @@ fi
 U_LINE2='\U02550\U02550\U02550\U02550\U02550\U02550\U02550\U02550'
 U_LINE=$U_LINE2$U_LINE2$U_LINE2$U_LINE2$U_LINE2
 
-IMAGE_DIR=$OUT_DIR'/image'
-TMP_FILE=$OUT_DIR'/virustotal.tmp'
-SORT_FILE=$OUT_DIR'/virustotal.sort'
+IMAGE_DIR=$PISC_OUT_DIR'/image'
+TMP_FILE=$PISC_OUT_DIR'/virustotal.tmp'
+SORT_FILE=$PISC_OUT_DIR'/virustotal.sort'
 
 # read the options
 ARGS=$(getopt -o i: --long image: -n $0 -- "$@")

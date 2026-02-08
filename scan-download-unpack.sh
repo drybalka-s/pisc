@@ -43,8 +43,8 @@ DONT_DOWNLOAD=false
 # it is important for run *.sh by ci-runner
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # get exported var with default value if it is empty
-: "${OUT_DIR:=/tmp}"
-: "${AUTH_FILE:=$SCRIPTPATH/auth.json}"
+: "${PISC_OUT_DIR:=/tmp}"
+: "${PISC_AUTH_FILE:=$SCRIPTPATH/auth.json}"
 # check debug mode to debug child scripts and external tools
 DEBUG_SKOPEO='> /dev/null 2>&1'
 DEBUG_TAR='2>/dev/null'
@@ -59,11 +59,11 @@ debug_null() {
     fi
 }
 
-RES_FILE=$OUT_DIR'/scan-download-unpack.result'
+RES_FILE=$PISC_OUT_DIR'/scan-download-unpack.result'
 
 SKOPEO_AUTH_FLAG=''
-if [ -f "$AUTH_FILE" ]; then
-    SKOPEO_AUTH_FLAG="--authfile=$AUTH_FILE"
+if [ -f "$PISC_AUTH_FILE" ]; then
+    SKOPEO_AUTH_FLAG="--authfile=$PISC_AUTH_FILE"
 fi
 
 # read the options
@@ -96,19 +96,19 @@ fi
 if [ -f $RES_FILE ]; then
     LAST_DOWNLOAD=$(<$RES_FILE)
     if [ "$LAST_DOWNLOAD" == "$IMAGE_LINK" ]; then
-        if [ -d "$OUT_DIR/image" ]; then
+        if [ -d "$PISC_OUT_DIR/image" ]; then
             exit 0
         fi
     fi
 fi
 
-if [ "$LOCAL_FILE" != "$OUT_DIR/image.tar" ]; then
-    `rm -f $OUT_DIR/image.tar` debug_null
+if [ "$LOCAL_FILE" != "$PISC_OUT_DIR/image.tar" ]; then
+    `rm -f $PISC_OUT_DIR/image.tar` debug_null
 fi
 # copy image to archive
 if [ -z "$LOCAL_FILE" ]; then
     echo -ne "  $(date +"%H:%M:%S") $IMAGE_LINK >>> copy\033[0K\r"
-    eval "skopeo --tmpdir ${OUT_DIR} copy docker://$IMAGE_LINK docker-archive:$OUT_DIR/image.tar $SKOPEO_AUTH_FLAG $DEBUG_SKOPEO" \
+    eval "skopeo --tmpdir ${PISC_OUT_DIR} copy docker://$IMAGE_LINK docker-archive:$PISC_OUT_DIR/image.tar $SKOPEO_AUTH_FLAG $DEBUG_SKOPEO" \
         || error_exit "$IMAGE_LINK >>> can't copy, check image name and tag"
 fi
 
@@ -117,12 +117,12 @@ echo -ne "  $(date +"%H:%M:%S") $IMAGE_LINK >>> unpack image\033[0K\r"
 #Therefore disable error checking
 set +Eeo pipefail
 #Unpack to the folder "image"
-`rm -rf $OUT_DIR/image` debug_null
-`mkdir $OUT_DIR/image` debug_null
+`rm -rf $PISC_OUT_DIR/image` debug_null
+`mkdir $PISC_OUT_DIR/image` debug_null
 if [ -z "$LOCAL_FILE" ]; then
-    eval tar -xf $OUT_DIR/image.tar -C $OUT_DIR/image $DEBUG_TAR
+    eval tar -xf $PISC_OUT_DIR/image.tar -C $PISC_OUT_DIR/image $DEBUG_TAR
 else
-    eval tar -xf $LOCAL_FILE -C $OUT_DIR/image $DEBUG_TAR
+    eval tar -xf $LOCAL_FILE -C $PISC_OUT_DIR/image $DEBUG_TAR
 fi
 #Turning error checking back on
 set -Eeo pipefail
@@ -130,16 +130,16 @@ set -Eeo pipefail
 # convert docker-save-format to docker-archive-format
 if [ ! -z "$LOCAL_FILE" ]; then
     echo -ne "  $(date +"%H:%M:%S") $IMAGE_LINK >>> convert format\033[0K\r"
-    if [ -d "$OUT_DIR/image/blobs/sha256" ]; then
-        for f in "$OUT_DIR/image/blobs/sha256"/*
+    if [ -d "$PISC_OUT_DIR/image/blobs/sha256" ]; then
+        for f in "$PISC_OUT_DIR/image/blobs/sha256"/*
         do
             MIME_TYPE=(`file --mime-type $f | awk '{print $2}'`)
             filename="${f##*/}"
             if [[ $MIME_TYPE == application/x-tar ]] ; then
-                mv $f $OUT_DIR/image/$filename.tar
+                mv $f $PISC_OUT_DIR/image/$filename.tar
             fi
             if [[ $MIME_TYPE == application/json ]] ; then
-                mv $f $OUT_DIR/image/$filename.json
+                mv $f $PISC_OUT_DIR/image/$filename.json
             fi
         done
     fi
