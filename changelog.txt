@@ -1,4 +1,16 @@
-v0.19.0
+v0.19.0-rc2
+Added
+    Yara scaning
+    Support exclusions for yara
+    Checking feeds data before --offline-feeds scanning
+    Show feeds dates at header
+Changed
+    Trivy 0.69.1
+    Grype 0.107.1
+Fixed
+    Exported vars
+
+v0.19.0-rc1
 Added
     The option to specify a directory for temporary files using --output-dir has been introduced.
     By default, this directory is set to /tmp.

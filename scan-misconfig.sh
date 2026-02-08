@@ -68,14 +68,14 @@ EMOJI_DOCKER='\U1F433' # whale
 # it is important for run *.sh by ci-runner
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # get exported var with default value if it is empty
-: "${OUT_DIR:=/tmp}"
+: "${PISC_OUT_DIR:=/tmp}"
 # check debug mode to debug child scripts
 DEBUG=''
 if [[ "$-" == *x* ]]; then
     DEBUG='-x '
 fi
 
-RES_FILE=$OUT_DIR'/scan-misconfig.result'
+RES_FILE=$PISC_OUT_DIR'/scan-misconfig.result'
 rm -f $RES_FILE
 touch $RES_FILE
 
@@ -117,7 +117,7 @@ fi
 
 echo -ne "  $(date +"%H:%M:%S") $IMAGE_LINK >>> scan misconfiguration\033[0K\r"
 
-for f in "$OUT_DIR/image"/*.json
+for f in "$PISC_OUT_DIR/image"/*.json
 do
     for (( i=0; i<${#MISCONFIG_REGEX[@]}; i++ ));
     do

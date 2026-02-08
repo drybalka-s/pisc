@@ -27,9 +27,9 @@ VULNERS_API_KEY=''
 
 # it is important for run *.sh by ci-runner
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-# check debug mode to debug child scripts and external tools
 # get exported var with default value if it is empty
-: "${OUT_DIR:=/tmp}"
+: "${PISC_OUT_DIR:=/tmp}"
+# check debug mode to debug child scripts and external tools
 DEBUG=''
 DEBUG_CURL='-s '
 if [[ "$-" == *x* ]]; then
@@ -47,10 +47,10 @@ debug_set() {
     fi
 }
 
-INPUT_FILE=$OUT_DIR'/scan-vulnerabilities.cve'
-JSON_FILE=$OUT_DIR'/scan-vulners-com.json'
-RES_FILE=$OUT_DIR'/scan-vulners-com.result'
-ERROR_FILE=$OUT_DIR'/scan-vulners-com.error'
+INPUT_FILE=$PISC_OUT_DIR'/scan-vulnerabilities.cve'
+JSON_FILE=$PISC_OUT_DIR'/scan-vulners-com.json'
+RES_FILE=$PISC_OUT_DIR'/scan-vulners-com.result'
+ERROR_FILE=$PISC_OUT_DIR'/scan-vulners-com.error'
 eval "rm -f $RES_FILE $ERROR_FILE"
 touch $RES_FILE
 

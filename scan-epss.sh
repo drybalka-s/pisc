@@ -29,18 +29,19 @@ URL_BASE='https://epss.empiricalsecurity.com'
 # it is important for run *.sh by ci-runner
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # get exported var with default value if it is empty
-: "${OUT_DIR:=/tmp}"
+: "${PISC_OUT_DIR:=/tmp}"
+: "${PISC_FEEDS_DIR:=$PISC_OUT_DIR/.cache}"
 # check debug mode to debug child scripts and external tools
 DEBUG_CURL='-sf '
 if [[ "$-" == *x* ]]; then
     DEBUG_CURL='-v '
 fi
 
-INPUT_FILE=$OUT_DIR'/scan-vulnerabilities.cve'
-DB_FILE=$OFFLINE_FEEDS_DIR'/epss.csv'
-GZ_FILE=$OUT_DIR'/epss.csv.gz'
-RES_FILE=$OUT_DIR'/epss.result'
-ERROR_FILE=$OUT_DIR'/epss.error'
+INPUT_FILE=$PISC_OUT_DIR'/scan-vulnerabilities.cve'
+DB_FILE=$PISC_FEEDS_DIR'/epss.csv'
+GZ_FILE=$PISC_FEEDS_DIR'/epss.csv.gz'
+RES_FILE=$PISC_OUT_DIR'/epss.result'
+ERROR_FILE=$PISC_OUT_DIR'/epss.error'
 eval "rm -f $RES_FILE $ERROR_FILE"
 touch $RES_FILE
 

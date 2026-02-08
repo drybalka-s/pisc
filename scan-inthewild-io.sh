@@ -29,18 +29,19 @@ OFFLINE_FEEDS=false
 # it is important for run *.sh by ci-runner
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # get exported var with default value if it is empty
-: "${OUT_DIR:=/tmp}"
+: "${PISC_OUT_DIR:=/tmp}"
+: "${PISC_FEEDS_DIR:=$PISC_OUT_DIR/.cache}"
 # check debug mode to debug child scripts and external tools
 DEBUG_CURL='-sf '
 if [[ "$-" == *x* ]]; then
     DEBUG_CURL='-v '
 fi
 
-INPUT_FILE=$OUT_DIR'/scan-vulnerabilities.cve'
-JSON_FILE=$OUT_DIR'/scan-inthewild-io.json'
-DB_FILE=$OFFLINE_FEEDS_DIR'/inthewild.db'
-RES_FILE=$OUT_DIR'/scan-inthewild-io.result'
-ERROR_FILE=$OUT_DIR'/scan-inthewild-io.error'
+INPUT_FILE=$PISC_OUT_DIR'/scan-vulnerabilities.cve'
+JSON_FILE=$PISC_OUT_DIR'/scan-inthewild-io.json'
+DB_FILE=$PISC_FEEDS_DIR'/inthewild.db'
+RES_FILE=$PISC_OUT_DIR'/scan-inthewild-io.result'
+ERROR_FILE=$PISC_OUT_DIR'/scan-inthewild-io.error'
 eval "rm -f $RES_FILE $ERROR_FILE"
 touch $RES_FILE
 
@@ -103,7 +104,7 @@ get_cve_info()
         mapfile -t EXPLOITS < <(sqlite3 -column "file:$DB_FILE?mode=ro&immutable=1" "SELECT type,timeStamp,referenceURL FROM exploits WHERE id = '$1';")
         if [[ ${#EXPLOITS[@]} -gt 0 ]]; then
             EXPL=true
-            rm -rf "$OUT_DIR/$1.expl"
+            rm -rf "$PISC_OUT_DIR/$1.expl"
             for ((ii=0; ii<${#EXPLOITS[@]}; ii+=1)); do
                 TYPE=$(echo "${EXPLOITS[$ii]}" | awk '{print $1}')
                 EXPLOITS[$ii]=$(echo "${EXPLOITS[$ii]}" | sed -E 's/^[^ ]+ +//')
@@ -117,7 +118,7 @@ get_cve_info()
                 else
                     EXPLOITS[$ii]="       ${EXPLOITS[$ii]}"
                 fi
-                echo "${EXPLOITS[$ii]}" >> "$OUT_DIR/$1.expl"
+                echo "${EXPLOITS[$ii]}" >> "$PISC_OUT_DIR/$1.expl"
             done
         fi
     fi

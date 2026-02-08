@@ -51,7 +51,7 @@ EMOJI_EXPLOITATION='\U1F480' # SKULL
 # it is important for run *.sh by ci-runner
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # get exported var with default value if it is empty
-: "${OUT_DIR:=/tmp}"
+: "${PISC_OUT_DIR:=/tmp}"
 # check debug mode to debug child scripts
 DEBUG=''
 if [[ "$-" == *x* ]]; then
@@ -69,18 +69,18 @@ debug_set() {
 }
 
 # cve list for exploit analysis
-CVE_FILE=$OUT_DIR'/scan-vulnerabilities.cve'
+CVE_FILE=$PISC_OUT_DIR'/scan-vulnerabilities.cve'
 # result this script for main output
-RES_FILE=$OUT_DIR'/scan-vulnerabilities.result'
+RES_FILE=$PISC_OUT_DIR'/scan-vulnerabilities.result'
 # results of trivy and grype
-RES_FILE_TRIVY=$OUT_DIR'/scan-trivy.result'
-RES_FILE_GRYPE=$OUT_DIR'/scan-grype.result'
+RES_FILE_TRIVY=$PISC_OUT_DIR'/scan-trivy.result'
+RES_FILE_GRYPE=$PISC_OUT_DIR'/scan-grype.result'
 # temp cve file after sorting
-SORT_FILE=$OUT_DIR'/scan-vulnerabilities.sort'
+SORT_FILE=$PISC_OUT_DIR'/scan-vulnerabilities.sort'
 # temp cve file before sorting
-TMP_FILE=$OUT_DIR'/scan-vulnerabilities.tmp'
+TMP_FILE=$PISC_OUT_DIR'/scan-vulnerabilities.tmp'
 # error file
-ERROR_FILE=$OUT_DIR'/scan-vulnerabilities.error'
+ERROR_FILE=$PISC_OUT_DIR'/scan-vulnerabilities.error'
 eval "rm -f $RES_FILE $SORT_FILE $TMP_FILE $ERROR_FILE $RES_FILE_TRIVY $RES_FILE_GRYPE"
 touch $RES_FILE $RES_FILE_TRIVY $RES_FILE_GRYPE
 
@@ -271,11 +271,11 @@ if [ "$IS_ERROR" = false ]; then
         debug_set false
         /bin/bash $DEBUG$SCRIPTPATH/scan-vulners-com.sh --dont-output-result -i $IMAGE_LINK --vulners-key $VULNERS_API_KEY $IGNORE_ERRORS_FLAG
         debug_set true
-        LIST_EXPL+=($(<$OUT_DIR/scan-vulners-com.result))
+        LIST_EXPL+=($(<$PISC_OUT_DIR/scan-vulners-com.result))
     # exploit analysis by inthewild.io
     else
         /bin/bash $DEBUG$SCRIPTPATH/scan-inthewild-io.sh --dont-output-result -i $IMAGE_LINK $OFFLINE_FEEDS_FLAG $IGNORE_ERRORS_FLAG
-        LIST_EXPL+=($(<$OUT_DIR/scan-inthewild-io.result))
+        LIST_EXPL+=($(<$PISC_OUT_DIR/scan-inthewild-io.result))
     fi
 fi
 
@@ -290,7 +290,7 @@ if [ "$IS_ERROR" = false ]; then
             l="-"
         fi
         LIST_EPSS+=("$l")
-    done < "$OUT_DIR/epss.result"
+    done < "$PISC_OUT_DIR/epss.result"
 fi
 
 # filtering by epss, exploit, exlusions
@@ -319,7 +319,7 @@ do
             IS_EXLUDED=true
         else
             IS_EXPLOITABLE=true
-            F=$OUT_DIR/${LIST_CVE[$i]}.expl
+            F=$PISC_OUT_DIR/${LIST_CVE[$i]}.expl
             if [ -s "$F" ]; then
                 EXPL_A_COUNT=$(wc -l < $F)
                 EXPL_B_COUNT=$(grep -c '^[[:space:]]*\\U1F480' $F)
@@ -359,7 +359,7 @@ if [ "$IS_EXPLOITABLE" = true ]; then
             if [[ $i -gt 1 ]]; then
                 CVE_ID=$(echo "${LINES[$i]}" | awk '{print $1}')
                 if [[ "$CVE_ID" == CVE-* ]]; then
-                    F="$OUT_DIR/$CVE_ID.expl"
+                    F="$PISC_OUT_DIR/$CVE_ID.expl"
                     if [[ -f "$F" ]]; then
                         RESULT_MESSAGE_WITH_EXPL+="$(cat "$F")"$'\n'
                     fi
@@ -369,7 +369,7 @@ if [ "$IS_EXPLOITABLE" = true ]; then
     done  
     # whitelist
     if [ "$IS_EXLUDED" == "true" ]; then
-        RESULT_MESSAGE_WITH_EXPL=$RESULT_MESSAGE_WITH_EXPL'\n'"$EMOJI_EXCLUDE Some CVEs or packages are whitelisted"
+        RESULT_MESSAGE_WITH_EXPL=$RESULT_MESSAGE_WITH_EXPL'\n'"$EMOJI_EXCLUDE some CVEs or packages are whitelisted"
     fi
     echo "$RESULT_MESSAGE_WITH_EXPL" > $RES_FILE
     if [ "$DONT_OUTPUT_RESULT" == "false" ]; then  
