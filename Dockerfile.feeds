@@ -37,7 +37,7 @@ RUN mkdir -p ${GRYPE_DB_CACHE_DIR} ${TRIVY_CACHE_DIR} \
   && mv ${TRIVY_CACHE_DIR}/fanal/fanal.db ${TRIVY_CACHE_DIR}/fanal/fanal.db.tmp \
   && ln -s /tmp/.cache/trivy/fanal/fanal.db ${TRIVY_CACHE_DIR}/fanal/fanal.db \
   && chown -R 65532:65532 /opt/db \
-  && chmod -R 500 /opt/db
+  && chmod -R 555 /opt/db
 
 USER nonroot
 WORKDIR /home/nonroot
