@@ -1,9 +1,9 @@
-FROM aquasec/trivy:0.68.2 AS trivy
+FROM aquasec/trivy:0.69.1 AS trivy
 
 FROM alpine:3
 
-RUN apk update && apk upgrade && apk --no-cache add bash coreutils curl jq yq util-linux skopeo file tar sqlite gnupg \
-  && GRYPE_VERSION="0.105.0" \
+RUN apk update && apk upgrade && apk --no-cache add bash coreutils curl file gnupg jq skopeo tar sqlite unzip util-linux yara yq \
+  && GRYPE_VERSION="0.107.1" \
   && curl -sSL "https://github.com/anchore/grype/releases/download/v${GRYPE_VERSION}/grype_${GRYPE_VERSION}_linux_amd64.tar.gz" -o grype.tar.gz \
   && tar -xzf grype.tar.gz -C /usr/local/bin grype \
   && rm grype.tar.gz
@@ -35,6 +35,6 @@ COPY check-exclusions.sh \
   trivy.tmpl \
   ./
 
-RUN chown -R 65532:65532 *.sh && chmod -R 755 *.sh
+RUN chown -R 65532:65532 *.* && chmod -R 555 /home/nonroot
 
 USER nonroot

@@ -19,14 +19,15 @@ set -Eeo pipefail
 IGNORE_ERRORS=false
 IMAGE_LINK=''
 IS_ERROR=false
-OFFLINE_FEEDS=false
+GRYPE_DB_AUTO_UPDATE=true
+GRYPE_DB_VALIDATE_AGE=true
 RESULT_MESSAGE=''
 
 # it is important for run *.sh by ci-runner
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # get exported var with default value if it is empty
-: "${OUT_DIR:=/tmp}"
-export TMPDIR=$OUT_DIR
+: "${PISC_OUT_DIR:=/tmp}"
+: "${PISC_FEEDS_DIR:=$PISC_OUT_DIR/.cache}"
 # check debug mode to debug child scripts
 DEBUG=''
 DEBUG_GRYPE='-q'
@@ -34,29 +35,28 @@ if [[ "$-" == *x* ]]; then
     DEBUG='-x '
     DEBUG_GRYPE='-vv'
 fi
-# turn on/off debugging for hide sensetive data
-debug_set() {
-    if [ "$1" = false ] ; then
-        set +x
-    else
-        if [ "$DEBUG" != "" ]; then
-            set -x
-        fi
-    fi
-}
 
+# grype feeds dir
+GRYPE_DB_CACHE_DIR=$PISC_FEEDS_DIR'/grype' 
 # default tar path
-INPUT_FILE=$OUT_DIR/image.tar
+INPUT_FILE=$PISC_OUT_DIR/image.tar
 # grype output
-CSV_FILE=$OUT_DIR'/scan-grype.csv'
+CSV_FILE=$PISC_OUT_DIR'/scan-grype.csv'
 # result this script for main output
-RES_FILE=$OUT_DIR'/scan-grype.result'
+RES_FILE=$PISC_OUT_DIR'/scan-grype.result'
 # error file
-ERROR_FILE=$OUT_DIR'/scan-grype.error'
+ERROR_FILE=$PISC_OUT_DIR'/scan-grype.error'
 # template file
 TMPL_FILE=$SCRIPTPATH'/grype.tmpl'
 eval "rm -f $CSV_FILE $RES_FILE $ERROR_FILE"
 touch $RES_FILE
+# unset exported variables
+unset_vars()
+{
+    unset GRYPE_DB_AUTO_UPDATE
+    unset GRYPE_DB_CACHE_DIR
+    unset GRYPE_DB_VALIDATE_AGE
+}
 # exception handling
 error_exit()
 {
@@ -67,16 +67,15 @@ error_exit()
             return 0
         else
             echo "  $IMAGE_LINK >>> $1                    "
+            unset_vars
             exit 2
         fi
     fi
 }
 
 # read the options
-debug_set false
 ARGS=$(getopt -o i: --long ignore-errors,image:,offline-feeds,tar: -n $0 -- "$@")
 eval set -- "$ARGS"
-debug_set true
 
 # extract options and their arguments into variables.
 while true ; do
@@ -94,7 +93,7 @@ while true ; do
         --offline-feeds)
             case "$2" in
                 "") shift 1 ;;
-                *) OFFLINE_FEEDS=true ; shift 1 ;;
+                *) GRYPE_DB_AUTO_UPDATE=false ; GRYPE_DB_VALIDATE_AGE=false ; shift 1 ;;
             esac ;;
         --tar)
             case "$2" in
@@ -106,25 +105,14 @@ while true ; do
     esac
 done
 
+# online/offline mode
+mkdir -p "$GRYPE_DB_CACHE_DIR" 2>/dev/null \
+    || error_exit "error access to GRYPE_DB_CACHE_DIR=$GRYPE_DB_CACHE_DIR"
+export GRYPE_DB_AUTO_UPDATE
+export GRYPE_DB_CACHE_DIR
+export GRYPE_DB_VALIDATE_AGE
+
 echo -ne "  $(date +"%H:%M:%S") $IMAGE_LINK >>> scan vulnerabilities by grype\033[0K\r"
-
-# offline mode
-if [[ "$OFFLINE_FEEDS" = true ]] && [[ -d "/opt/db/grype" ]]; then
-  export GRYPE_DB_AUTO_UPDATE=false
-  if (touch "/opt/db/grype/.check_rw" ) 2>/dev/null; then
-    export GRYPE_DB_CACHE_DIR=/opt/db/grype
-  else
-    export GRYPE_DB_CACHE_DIR="$OUT_DIR"'/.cache/grype'
-    if [[ ! -d "$GRYPE_DB_CACHE_DIR" ]]; then
-      mkdir -p "$OUT_DIR"'/.cache/grype' && cp -r /opt/db/grype/ "$OUT_DIR"'/.cache/'
-    fi
-  fi
-else
-    export GRYPE_DB_AUTO_UPDATE=true
-    export GRYPE_DB_CACHE_DIR=$OUT_DIR'/.cache/grype'
-    mkdir -p "$GRYPE_DB_CACHE_DIR"
-
-fi
 
 # use one-string template
 
@@ -179,5 +167,7 @@ do
     fi
     echo "${LIST_PKG[$i]} ${LIST_CVE[$i]} ${LIST_SEVERITY[$i]} ${LIST_SCORE[$i]} ${LIST_FIXED[$i]}" >> $RES_FILE
 done
+
+unset_vars
 
 exit 0

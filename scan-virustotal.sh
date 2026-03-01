@@ -92,7 +92,7 @@ EMOJI_CODES=(
 # it is important for run *.sh by ci-runner
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # get exported var with default value if it is empty
-: "${OUT_DIR:=/tmp}"
+: "${PISC_OUT_DIR:=/tmp}"
 # check debug mode to debug child scripts and external tools
 DEBUG=''
 DEBUG_CURL='-sf '
@@ -120,17 +120,17 @@ debug_null() {
 }
 
 
-IMAGE_DIR=$OUT_DIR'/image'
-ADVANCED_DIR=$OUT_DIR'/advanced'
+IMAGE_DIR=$PISC_OUT_DIR'/image'
+ADVANCED_DIR=$PISC_OUT_DIR'/advanced'
 
-JSON_RELATIONSHIP_FILE=$OUT_DIR'/virustotal-rel.json'
-JSON_SEARCH_FILE=$OUT_DIR'/virustotal.json'
-URL_FILE=$OUT_DIR'/virustotal-url.json'
-UPLOAD_JSON_FILE=$OUT_DIR'/virustotal-upload.json'
-RES_FILE=$OUT_DIR'/scan-virustotal.result'
-TMP_FILE=$OUT_DIR'/virustotal.tmp'
-SORT_FILE=$OUT_DIR'/virustotal.sort'
-ERROR_FILE=$OUT_DIR'/scan-virustotal.error'
+JSON_RELATIONSHIP_FILE=$PISC_OUT_DIR'/virustotal-rel.json'
+JSON_SEARCH_FILE=$PISC_OUT_DIR'/virustotal.json'
+URL_FILE=$PISC_OUT_DIR'/virustotal-url.json'
+UPLOAD_JSON_FILE=$PISC_OUT_DIR'/virustotal-upload.json'
+RES_FILE=$PISC_OUT_DIR'/scan-virustotal.result'
+TMP_FILE=$PISC_OUT_DIR'/virustotal.tmp'
+SORT_FILE=$PISC_OUT_DIR'/virustotal.sort'
+ERROR_FILE=$PISC_OUT_DIR'/scan-virustotal.error'
 eval "rm -f $RES_FILE $ERROR_FILE"
 
 # exception handling
@@ -474,7 +474,7 @@ unpack() {
     LIST_TAR_FILES=()
     LIST_TAR_FILES=(`awk '{print $1}' $SORT_FILE`)
     # turning error checking back on
-    set -Eeo pipefail    
+    set -Eeo pipefail
 }
 
 # check mime-types

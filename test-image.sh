@@ -18,12 +18,12 @@ set -Eeo pipefail
 
 IMAGE="${1:-}"
 # get exported var with default value if it is empty
-: "${OUT_DIR:=/tmp}"
+: "${PISC_OUT_DIR:=/tmp}"
 
 if [[ -z "$IMAGE" ]]; then
     echo "Usage: $0 <image>"
-    echo "Example: $0 kapistka/pisc:v0.19.0"
-    echo "         $0 kapistka/pisc:v0.19.0-feeds"
+    echo "Example: $0 kapistka/pisc:v0.19.0-rc2"
+    echo "         $0 kapistka/pisc:v0.19.0-rc2-feeds"
     exit 2
 elif [[ "$IMAGE" != *"feeds"* ]]; then
     OFFLINE_FLAG=''
@@ -48,9 +48,9 @@ echo "run $IMAGE"
 
 set +e
 docker run --rm \
-    -v "$INPUT_FILE":$OUT_DIR"/images.txt" \
+    -v "$INPUT_FILE":$PISC_OUT_DIR"/images.txt" \
     "$IMAGE" \
-    /bin/bash /home/nonroot/scan.sh -delm "$OFFLINE_FLAG" --virustotal-key "$VT_API_KEY" -f $OUT_DIR"/images.txt" \
+    /bin/bash /home/nonroot/scan.sh -delmy "$OFFLINE_FLAG" --virustotal-key "$VT_API_KEY" -f $PISC_OUT_DIR"/images.txt" \
     2>&1 | tee "$LOG_FILE"
 EXIT_CODE=$?
 set -e

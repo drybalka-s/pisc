@@ -41,7 +41,7 @@ LOCAL_FILE=''
 # it is important for run *.sh by ci-runner
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # get exported var with default value if it is empty
-: "${OUT_DIR:=/tmp}"
+: "${PISC_OUT_DIR:=/tmp}"
 # check debug mode to debug child scripts and external tools
 DEBUG=''
 DEBUG_SKOPEO=''
@@ -57,13 +57,13 @@ debug_null() {
     fi    
 }
 
-IMAGE_DIR=$OUT_DIR'/image'
-JSON_FILE=$OUT_DIR'/inspect.json'
-RES_FILE=$OUT_DIR'/scan-date.result'
+IMAGE_DIR=$PISC_OUT_DIR'/image'
+JSON_FILE=$PISC_OUT_DIR'/inspect.json'
+RES_FILE=$PISC_OUT_DIR'/scan-date.result'
 rm -f $RES_FILE
 
 SKOPEO_AUTH_FLAG=''
-AUTH_FILE=$OUT_DIR'/auth.json'
+AUTH_FILE=$PISC_OUT_DIR'/auth.json'
 if [ -f "$AUTH_FILE" ]; then
     SKOPEO_AUTH_FLAG="--authfile=$AUTH_FILE"
 fi
